@@ -1,19 +1,15 @@
+import uvicorn
 from fastapi import FastAPI
 import requests
+
 app = FastAPI()
 
-def hello():
-    return 'hello'
-
 @app.get("/")
-async def get_data():
+def get_api_data(url):
 
-    url = "https://tasty.p.rapidapi.com/recipes/list"
+    res = requests.get(url)
+    return res.json()
 
-    headers = {
-    	"X-RapidAPI-Key": "b4243423f4mshf9497499cbedf7cp1590cfjsn2115cba68932",
-    	"X-RapidAPI-Host": "tasty.p.rapidapi.com"
-    }
-    response = requests.get(url, headers=headers) 
-    response.raise_for_status()
-    return response.json()
+# Run the app
+if __name__ == "__main__":
+    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
