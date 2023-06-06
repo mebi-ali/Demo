@@ -1,4 +1,4 @@
-#!/home/mehboobali/Desktop/demo_project/venv/bin/python3
+#!/home/mehboobali/Desktop/Demo/demo/demo_project/venv/bin/python
 # -*- coding: utf-8 -*-
 import re
 import sys

@@ -1,13 +1,21 @@
+import json
+from pyspark.sql import SparkSession
+from pyspark.sql import SQLContext
+
 from main import send_data
+
+# Create a Spark session
+spark = SparkSession.builder.getOrCreate()
 
 data = send_data()
 
-appointment_keys =  data['appointment'][0].keys()
-councillor_keys =  data['councillor'][0].keys()
-patient_councillor_keys = data['patient_councillor'][0].keys()
-rating_keys =  data['rating'][0].keys()
+appointment = spark.read.json(spark.sparkContext.parallelize([json.dumps(data["appointment"])]))
+councillor = spark.read.json(spark.sparkContext.parallelize([json.dumps(data['councillor'])]))
+patient_councillor = spark.read.json(spark.sparkContext.parallelize([json.dumps(data['patient_councillor'])]))
+rating = spark.read.json(spark.sparkContext.parallelize([json.dumps(data['rating'])]))
 
-print(appointment_keys)
-print(councillor_keys)
-print(patient_councillor_keys)
-print(rating_keys)
+
+appointment_rating = appointment.join(rating, appointment['id']==rating['appointment_id']).select(appointment['patient_id'], rating['value'])
+patient_appointment_rating = appointment_rating.join(patient_councillor, appointment_rating['patient_id']==patient_councillor['patient_id'])
+
+patient_appointment_rating.show(2)
