@@ -16,6 +16,5 @@ urls = {
 }
 
 
-
 if __name__ == "__main__":
     get_api_data()
