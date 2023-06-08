@@ -1,13 +1,48 @@
+# FROM python:3.9
+
+# WORKDIR /home/app/
+
+# COPY . /home/app/
+
+# COPY ./requirements.txt .
+
+# RUN  apt-get update && apt-get install -y --no-install-recommends openjdk-11-jdk
+
+# RUN pip3 install --no-cache-dir -r requirements.txt
+
+# CMD [ "bash", "start.sh" ]
+
 FROM python:3.9
 
 WORKDIR /home/app/
 
 COPY . /home/app/
 
-COPY ./requirements.txt .
+COPY requirements.txt .
 
-RUN pip3 install --no-cache-dir -r requirements.txt
+RUN  apt-get update && apt-get install -y --no-install-recommends openjdk-11-jdk
 
-ENV PYTHONPATH=${PYTHONPATH}:/home/app/
+RUN pip install pyspark
+RUN pip install requests 
 
-CMD [ "python3", "hello.py" ]
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Install cron and other dependencies
+RUN apt-get update && apt-get install -y cron
+
+# Copy the cron job configuration file to the container
+COPY cronjob /etc/cron.d/cronjob
+
+# Create the log file
+RUN touch /var/log/cron.log
+
+# Give execution rights to the cron job
+RUN chmod 0644 /etc/cron.d/cronjob
+
+# Apply the cron job
+RUN crontab /etc/cron.d/cronjob
+
+# Run cron and tail the log file
+CMD cron && tail -f /var/log/cron.log
+
+
