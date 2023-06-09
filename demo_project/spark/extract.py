@@ -4,19 +4,14 @@ import sys
 sys.path.insert(0, '.')
 from all_apis import get_api_data, urls
 
-data = {} # will decide at the end where to put data veriable
+# will decide at the end where to put data veriable
 
 def get_data():
-    # data = {}
-    for key, val in urls.items():
-        data[key] = get_api_data(val)
+    data = {key:get_api_data(val) for key, val in urls.items()}
     return data
 
-def main():
-    return get_data()
-
 if __name__ == "__main__":
-    main()
+    get_data()
 
 
 

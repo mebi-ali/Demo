@@ -1,1 +1,1 @@
-*/5 * * * * python3 /home/app/transform.py >> /var/log/cron.log 2>&1
+*/5 * * * *  /usr/local/bin/python /home/app/transform.py >> /var/log/cron.log 2>&1
