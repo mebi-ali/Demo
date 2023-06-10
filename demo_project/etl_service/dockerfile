@@ -7,7 +7,7 @@ COPY . /home/app/
 
 COPY requirements.txt .
 
-RUN  apt-get update && apt-get install -y --no-install-recommends openjdk-11-jdk
+RUN  apt-get update && apt-get install -y --no-install-recommends openjdk-11-jdk && apt install redis-server
 
 RUN pip install --no-cache-dir -r requirements.txt
 
