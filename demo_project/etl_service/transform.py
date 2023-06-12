@@ -1,7 +1,7 @@
 import json
 from pyspark.sql import SparkSession
 from pyspark.sql import SQLContext
-from pyspark.sql.functions import  avg, collect_list, struct, explode
+from pyspark.sql.functions import  avg, collect_list, struct
 from extract import get_data
 spark = SparkSession.builder.getOrCreate()
 
@@ -9,6 +9,7 @@ data = get_data()
 
 def extract_data(table_name):
     return spark.createDataFrame(data[table_name])
+
 def get_all_tables():
     appointment = extract_data('appointment') 
     councillor = extract_data('councillor')
@@ -32,20 +33,17 @@ def joined_data():
     councillor_patient_appointment_rating = patient_appointment_rating.join(councillor,
         patient_appointment_rating['councillor_id']==councillor['id']) \
         .select(
-            patient_appointment_rating['patient_id'],
             patient_appointment_rating['councillor_id'],
             councillor['specialization'],
             patient_appointment_rating['value'])
 
-    councillor_patient_appointment_rating = councillor_patient_appointment_rating.drop('patient_id')
-
     councillors_avg_ratings = councillor_patient_appointment_rating.groupBy('councillor_id', 'specialization') \
     .agg(avg('value').alias('avg_rating')).orderBy('avg_rating', ascending=False)
 
-    specialized_councillors_with_avg_rating = councillors_avg_ratings.groupBy("specialization") \
+    specialized_councillors_with_avg_ratings = councillors_avg_ratings.groupBy("specialization") \
     .agg(collect_list(struct("councillor_id", "avg_rating")).alias("councillor_ids_with_avg_ratings"))
 
-    return specialized_councillors_with_avg_rating
+    return specialized_councillors_with_avg_ratings
 
 # def matching_doctors():
 
@@ -62,4 +60,5 @@ def joined_data():
 
 
 if __name__ == "__main__":
-    joined_data()
+    df =joined_data()
+    df.show(3)
