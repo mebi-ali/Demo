@@ -1,0 +1,4 @@
+requests
+fastapi
+redis
+uvicorn[standard]
