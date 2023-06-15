@@ -14,14 +14,16 @@ def get_report_id_data(report_id: int) -> str:
         err_msg = f"Error {response.status_code} occurred while accessing {url}"
         logger.error('Report ID not found')
         raise Exception(err_msg)
+        return None
 
-def matching_councillors(report_category: str=None, number_of_doctors: int=15):
-    if report_category is None:
-        report_category = get_report_id_data()
+def matching_councillors(report_id: int, number_of_doctors: int=15):
+
+    report_category = get_report_id_data(report_id)
     councillors_with_ratings = json.loads(redis_client.get(report_category))
     top_councillors = [json.loads(item) for item in councillors_with_ratings[:number_of_doctors]]
-    logger.info("Returing top councillors")
+    logger.info("Returning top councillors")
     return top_councillors
+
 
 if __name__ == "__main__":
     matching_councillors()

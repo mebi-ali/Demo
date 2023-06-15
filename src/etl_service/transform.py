@@ -1,21 +1,26 @@
+import os
+import logging
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import  avg, collect_list, struct
-from extract import get_api_data, urls
+from extract import get_api_data
 from base_logger import logger
+from dotenv import load_dotenv
+load_dotenv()
 
-spark = SparkSession.builder.getOrCreate()
 
-
-def get_all_tables():
-    appointment = spark.createDataFrame(get_api_data(urls['appointment'])) 
-    councillor = spark.createDataFrame(get_api_data(urls['councillor']))
-    patient_councillor = spark.createDataFrame(get_api_data(urls['patient_councillor'])) 
-    rating = spark.createDataFrame(get_api_data(urls['rating']))
+def get_all_tables(spark: SparkSession.builder.appName) -> tuple:
+    
+    appointment = spark.createDataFrame(get_api_data(os.environ.get("APPOINTMENT"))) 
+    councillor = spark.createDataFrame(get_api_data(os.environ.get("COUNCILLOR")))
+    patient_councillor = spark.createDataFrame(get_api_data(os.environ.get("PATIENT_COUNCILLOR"))) 
+    rating = spark.createDataFrame(get_api_data(os.environ.get("RATING")))
     logger.info("Data received from endpoints")
     return appointment, councillor, patient_councillor, rating
 
-def joined_data() -> dict:  
-    appointment, councillor, patient_councillor,rating = get_all_tables()
+def joined_data() -> dict: 
+    spark = SparkSession.builder.appName("TransformationPhase").getOrCreate()
+
+    appointment, councillor, patient_councillor,rating = get_all_tables(spark)
 
     appointment_rating = appointment.join(rating, appointment['id']==rating['appointment_id']) \
     .select(appointment['patient_id'], rating['value'])
@@ -45,10 +50,10 @@ def joined_data() -> dict:
     for specialization in specializations:
         specializations_dfs[specialization] = councillors_avg_ratings.filter(
         councillors_avg_ratings.specialization == specialization).drop("specialization").toJSON().collect()
+    spark.stop()
 
     logger.info("Data has been transformed")
     return specializations_dfs
-
 
 
 if __name__ == "__main__":

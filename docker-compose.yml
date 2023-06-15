@@ -1,0 +1,20 @@
+version: '3'
+services:
+  etl:
+    build:
+      context: ./src/etl_service
+      dockerfile: Dockerfile
+    container_name: etl-container
+    networks:
+      - default
+    environment: 
+      - APPOINTMENT=${APPOINTMENT}
+      - COUNCILLOR=${COUNCILLOR}
+      - PATIENT_COUNCILLOR=${PATIENT_COUNCILLOR}
+      - RATING=${PATIENT_COUNCILLOR}
+    ports:
+      - '6379:6379'
+
+networks:
+  default:
+    name: capstone-project

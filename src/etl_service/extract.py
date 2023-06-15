@@ -1,4 +1,5 @@
 import requests
+import os
 from base_logger import logger
 
 def get_api_data(url: str) -> dict:
@@ -9,14 +10,7 @@ def get_api_data(url: str) -> dict:
         err_msg = f"Error {response.status_code} occurred while accessing {url}"
         logger.error(err_msg)
         raise Exception(err_msg)
-
-urls = {
-    "appointment": "https://xloop-dummy.herokuapp.com/appointment",
-    "councillor": "https://xloop-dummy.herokuapp.com/councillor",
-    "patient_councillor": "https://xloop-dummy.herokuapp.com/patient_councillor",
-    "rating": "https://xloop-dummy.herokuapp.com/rating"
-}
-
+        return None
 
 if __name__ == "__main__":
-    get_api_data(" ")
+    get_api_data(None)
