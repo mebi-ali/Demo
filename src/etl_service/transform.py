@@ -1,25 +1,23 @@
 import os
 import logging
 from pyspark.sql import SparkSession
-from pyspark.sql.functions import  avg, collect_list, struct
-from extract import get_api_data
+from pyspark.sql.functions import  avg
+from extract import get_api_data, urls
 from base_logger import logger
-from dotenv import load_dotenv
-load_dotenv()
 
+def create_dataframe(spark: SparkSession.builder.appName,json_data: list):
+    return spark.createDataFrame(json_data)
 
 def get_all_tables(spark: SparkSession.builder.appName) -> tuple:
-    
-    appointment = spark.createDataFrame(get_api_data(os.environ.get("APPOINTMENT"))) 
-    councillor = spark.createDataFrame(get_api_data(os.environ.get("COUNCILLOR")))
-    patient_councillor = spark.createDataFrame(get_api_data(os.environ.get("PATIENT_COUNCILLOR"))) 
-    rating = spark.createDataFrame(get_api_data(os.environ.get("RATING")))
+    appointment = create_dataframe(spark, get_api_data(urls['appointment']))
+    councillor = create_dataframe(spark ,get_api_data(urls['councillor']))
+    patient_councillor = create_dataframe(spark, get_api_data(urls['patient_councillor'])) 
+    rating = create_dataframe(spark ,get_api_data(urls['rating']))
     logger.info("Data received from endpoints")
     return appointment, councillor, patient_councillor, rating
 
 def joined_data() -> dict: 
     spark = SparkSession.builder.appName("TransformationPhase").getOrCreate()
-
     appointment, councillor, patient_councillor,rating = get_all_tables(spark)
 
     appointment_rating = appointment.join(rating, appointment['id']==rating['appointment_id']) \
@@ -54,7 +52,6 @@ def joined_data() -> dict:
 
     logger.info("Data has been transformed")
     return specializations_dfs
-
 
 if __name__ == "__main__":
     joined_data()

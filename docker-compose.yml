@@ -3,7 +3,6 @@ services:
   etl:
     build:
       context: ./src/etl_service
-      dockerfile: Dockerfile
     container_name: etl-container
     networks:
       - default
@@ -13,7 +12,7 @@ services:
       - PATIENT_COUNCILLOR=${PATIENT_COUNCILLOR}
       - RATING=${PATIENT_COUNCILLOR}
     ports:
-      - '6379:6379'
+      - '80:80'
 
 networks:
   default:
