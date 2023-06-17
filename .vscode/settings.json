@@ -3,6 +3,7 @@
         "councillors",
         "dotenv",
         "fastapi",
+        "pyspark",
         "uvicorn"
     ]
 }

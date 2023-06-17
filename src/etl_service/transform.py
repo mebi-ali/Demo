@@ -1,11 +1,10 @@
 import os
-import logging
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import  avg
 from extract import get_api_data, urls
 from base_logger import logger
 
-def create_dataframe(spark: SparkSession.builder.appName,json_data: list):
+def create_dataframe(spark: SparkSession.builder.appName, json_data: list):
     return spark.createDataFrame(json_data)
 
 def get_all_tables(spark: SparkSession.builder.appName) -> tuple:
