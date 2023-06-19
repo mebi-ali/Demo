@@ -1,19 +1,23 @@
 version: '3'
 services:
+
+  redis:
+    image: redis:latest
+    command: ["redis-server", "--bind", "redis", "--port", "6379"]
+    networks:
+      - capstone-project
+
   etl:
     build:
       context: ./src/etl_service
     container_name: etl-container
     networks:
-      - default
-    environment: 
-      - APPOINTMENT=${APPOINTMENT}
-      - COUNCILLOR=${COUNCILLOR}
-      - PATIENT_COUNCILLOR=${PATIENT_COUNCILLOR}
-      - RATING=${PATIENT_COUNCILLOR}
+      - capstone-project
     ports:
       - '80:80'
+    depends_on:
+      - redis
 
 networks:
-  default:
+  capstone-project:
     name: capstone-project
