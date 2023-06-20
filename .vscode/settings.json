@@ -1,6 +1,7 @@
 {
     "cSpell.words": [
         "councillors",
+        "dataframes",
         "dotenv",
         "fastapi",
         "pyspark",

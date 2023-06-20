@@ -1,56 +1,58 @@
 import os
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import  avg
+from pyspark.sql.utils import AnalysisException
 from extract import get_api_data, urls
 from base_logger import logger
 
-def create_dataframe(spark: SparkSession.builder.appName, json_data: list):
-    return spark.createDataFrame(json_data)
 
-def get_all_tables(spark: SparkSession.builder.appName) -> tuple:
-    appointment = create_dataframe(spark, get_api_data(urls['appointment']))
-    councillor = create_dataframe(spark ,get_api_data(urls['councillor']))
-    patient_councillor = create_dataframe(spark, get_api_data(urls['patient_councillor'])) 
-    rating = create_dataframe(spark ,get_api_data(urls['rating']))
+def get_all_tables(spark: SparkSession) -> dict:
+    dataframes = {key: spark.createDataFrame(get_api_data(url)) for key, url in urls.items()}
     logger.info("Data received from endpoints")
-    return appointment, councillor, patient_councillor, rating
+    return dataframes    
 
-def joined_data() -> dict: 
+def joined_data(spark: SparkSession) -> dict: 
+    dataframes = get_all_tables(spark)
+    appointment = dataframes['appointment']
+    councillor = dataframes['councillor']
+    patient_councillor = dataframes['patient_councillor']
+    rating = dataframes['rating']
+
+    councillor_specialization_rating = (
+            appointment.join(
+                patient_councillor,
+                appointment["patient_id"] == patient_councillor["patient_id"],
+            )
+            .join(rating, appointment["id"] == rating["appointment_id"])
+            .join(
+                councillor, councillor["id"] == patient_councillor["councillor_id"]
+            )
+            .select(
+                councillor["id"].alias("councillor_id"),
+                councillor["specialization"],
+                rating["value"],
+            )
+        )
+    return councillor_specialization_rating
+    # councillors_avg_ratings = councillor_specialization_rating.groupBy('councillor_id', 'specialization') \
+    # .agg(avg('value').alias('avg_rating')).orderBy('avg_rating', ascending=False)
+    # logger.info("Data has been Joined.")
+    # return councillors_avg_ratings
+
+def transformations() -> dict:
     spark = SparkSession.builder.appName("TransformationPhase").getOrCreate()
-    appointment, councillor, patient_councillor,rating = get_all_tables(spark)
-
-    appointment_rating = appointment.join(rating, appointment['id']==rating['appointment_id']) \
-    .select(appointment['patient_id'], rating['value'])
-
-    patient_appointment_rating = appointment_rating.join(patient_councillor, 
-        appointment_rating['patient_id']==patient_councillor['patient_id']) \
-        .select(
-            appointment_rating['patient_id'],
-            patient_councillor['councillor_id'], 
-            appointment_rating['value'])
-
-    councillor_specialization_rating = patient_appointment_rating.join(councillor,
-        patient_appointment_rating['councillor_id']==councillor['id']) \
-        .select(
-            patient_appointment_rating['councillor_id'],
-            councillor['specialization'],
-            patient_appointment_rating['value'])
-
-    councillors_avg_ratings = councillor_specialization_rating.groupBy('councillor_id', 'specialization') \
-    .agg(avg('value').alias('avg_rating')).orderBy('avg_rating', ascending=False)
-
-    
+    councillor_specialization_rating = joined_data(spark)
     specializations = [row.specialization for row in  
                         councillor_specialization_rating.select("specialization").distinct().collect()]
-
     specializations_dfs = {}
     for specialization in specializations:
-        specializations_dfs[specialization] = councillors_avg_ratings.filter(
-        councillors_avg_ratings.specialization == specialization).drop("specialization").toJSON().collect()
+        specializations_dfs[specialization] = councillor_specialization_rating.filter(
+            councillor_specialization_rating["specialization"] == specialization) \
+            .groupBy("councillor_id").agg(avg("value").alias("average_rating")).orderBy("average_rating", ascending=False) \
+            .drop("specialization").toJSON().collect()
     spark.stop()
-
-    logger.info("Data has been transformed")
+    logger.info("Data has been transformed.")
     return specializations_dfs
 
 if __name__ == "__main__":
-    joined_data()
+    transformations()

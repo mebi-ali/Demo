@@ -8,10 +8,10 @@ COPY . /home/etl_service/
 # Update package lists
 RUN apt-get update
 
-# Install OpenJDK 11 JDK
+# Install OpenJDK 17 JDK
 RUN apt-get install -y --no-install-recommends openjdk-17-jdk
 
-# RUN apt-get install -y --no-install-recommends openjdk-11-jdk
+# RUN apt-get install -y redis-server
 RUN apt install -y redis-server
 
 RUN pip install --no-cache-dir -r requirements.txt

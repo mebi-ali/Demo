@@ -11,12 +11,23 @@ services:
     build:
       context: ./src/etl_service
     container_name: etl-container
+    environment:
+      - BASE_URL='https://xloop-dummy.herokuapp.com'
+    networks:
+      - capstone-project
+    depends_on:
+      - redis
+
+  matching:
+    build: 
+      context: ./src/matching_service
+    container_name: matching-service
     networks:
       - capstone-project
     ports:
-      - '80:80'
+      - 8000:8000
     depends_on:
-      - redis
+      - etl
 
 networks:
   capstone-project:
