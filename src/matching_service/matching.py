@@ -1,7 +1,7 @@
 import os
 import requests # type: ignore
 import json
-from redis_connector import redis_client
+from redis_connector import get_redis_client
 from base_logger import logger
 from dotenv import load_dotenv
 load_dotenv()
@@ -20,7 +20,7 @@ def get_report_id_data(report_id: int) -> str:
 
 def matching_councillors(report_id: int, number_of_doctors: int=15):
     report_category = get_report_id_data(report_id)
-    councillors_with_ratings = json.loads(redis_client.get(report_category).decode())
+    councillors_with_ratings = json.loads(get_redis_client().get(report_category).decode())
     top_councillors = [json.loads(item) for item in councillors_with_ratings[:number_of_doctors]]
     logger.info("Returning top councillors")
     return top_councillors
