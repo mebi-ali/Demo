@@ -1,1 +1,1 @@
-*/3 * * * *  /usr/local/bin/python /home/etl_service/load.py >> /var/log/cron.log 2>&1
+*/1 * * * * root . /home/etl_service/.env && sh  /home/etl_service/start.sh 
