@@ -7,7 +7,8 @@ from dotenv import load_dotenv
 load_dotenv()
 
 def get_report_id_data(report_id: int) -> str:
-    url = f"{os.getenv('BASE_URL')}/report/{report_id}"
+    # url = f"{os.getenv('BASE_URL')}/report/{report_id}"
+    url = f"https://xloop-dummy.herokuapp.com/report/{report_id}"
     response = requests.get(url)
     if response.status_code == 200:
         response_data = response.json()
