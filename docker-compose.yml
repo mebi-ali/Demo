@@ -17,7 +17,7 @@ services:
       - redis
 
   matching:
-    build: 
+    build:
       context: ./src/matching_service
     container_name: matching-service
     environment:

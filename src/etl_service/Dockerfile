@@ -1,7 +1,7 @@
 # Base Image
 FROM python:latest
 
-# Working Dic
+# Working Dir
 WORKDIR /home/etl_service/
 
 # Copy files
@@ -16,10 +16,10 @@ RUN apt-get install -y --no-install-recommends openjdk-17-jdk
 # RUN apt-get install -y redis-server
 RUN apt install -y redis-server
 
-# Install requirements
+# RUN requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Install cron and other dependencies
+# Install cronjob
 RUN apt-get update && apt-get install -y cron
 
 # Copy the cron job configuration file to the container
@@ -34,5 +34,5 @@ RUN chmod 0644 /etc/cron.d/cronjob
 # Apply the cron job
 RUN crontab /etc/cron.d/cronjob
 
-#Run cron and tail the log file
+# Run cron and tail the log file
 CMD cron && tail -f /var/log/cron.log
