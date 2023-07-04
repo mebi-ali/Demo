@@ -26,11 +26,15 @@ def fetch_all_data(spark: SparkSession) -> dict:
     - dict:
         A dictionary containing the fetched DataFrames.
     """
+<<<<<<< HEAD
     dataframes = {}
     for key, url in urls.items():
         data = get_api_data(url)
         dataframes[key] = spark.createDataFrame(data)
 
+=======
+    dataframes = {key: get_api_data(url) for key, url in urls.items()}
+>>>>>>> f1cddabe60ee508a6e5c931f110b118b29f0ebdb
     logger.info("Data received from endpoints")
 
     return dataframes

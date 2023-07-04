@@ -8,6 +8,18 @@ load_dotenv()
 
 
 def get_api_data(url: str) -> dict:
+<<<<<<< HEAD
+=======
+    """
+    Retrieve data from the specified API endpoint.
+
+    Parameters:
+    - url (str): The URL of the API endpoint.
+
+    Returns:
+    - dict: The JSON response data from the API.
+    """
+>>>>>>> f1cddabe60ee508a6e5c931f110b118b29f0ebdb
     response = requests.get(url)
     try:
         response.raise_for_status()
